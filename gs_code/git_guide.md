@@ -120,6 +120,36 @@ work. If you truly need them, double-check the target first.
 - `prune/` scripts and `dataset_sizes.csv` are special (see `AGENTS.md`) —
   don't edit `dataset_sizes.csv` by hand or invoke `prune/` from normal code.
 
+## S3 upload posture (this fork)
+
+This fork is configured to stay local. Three things to know:
+
+1. **Default flow is local.** `python download.py` uses
+   `local_only=True` on the `S3ArchiveManager` (`download.py:317`) — files
+   land under `./sc_data/` and nothing is uploaded.
+
+2. **`--sync-s3` and `--sync-s3-fill` upload to vanga's public bucket**
+   (`s3://indian-supreme-court-judgments`). Don't pass these flags unless
+   you've arranged to write to a bucket you actually own. Running them
+   against vanga's bucket from this fork would either fail on AWS auth
+   or — worse, if you have creds — publish to their dataset.
+
+3. **GitHub Actions on this fork are disabled** via the Actions settings
+   page (`https://github.com/Xieta-AI/indian-supreme-court-judgments/settings/actions`).
+   The upstream workflows `.github/workflows/update-s3-data.yml` and
+   `.github/workflows/fill-s3.yml` are still present in the repo (so
+   upstream refreshes don't conflict), but they can't run. If you ever
+   re-enable Actions, neuter or delete those two files first.
+
+## Scraper politeness (this fork)
+
+`--max_workers` default is **1** (changed from upstream's 5) in:
+- `download.py` (CLI arg + `run()` signature)
+- `sync_s3_fill.py` (`sync_s3_fill_gaps()` signature)
+
+Keep it at 1 unless you have a specific reason. Per `AGENTS.md` and
+`README.md`, being gentle to `ecourts.gov.in` is an explicit project value.
+
 ## Useful reads
 
 - Workflow plan: `C:\Users\direc\.claude\plans\i-downloaded-this-repo-velvety-prism.md`
